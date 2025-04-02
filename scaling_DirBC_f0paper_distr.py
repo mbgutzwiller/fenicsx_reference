@@ -37,8 +37,9 @@ material_properties = {
     'c2': 0,
 }
 l2_err_plot = []
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 800]
+grid_sizes = [50, 100, 200, 400, 800, 1600, 3200, 4000]
 grid_sizes_run = []
+runtimes = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     grid_sizes_run.append(grid_size)
     print(f"Starting run {i+1} of {len(grid_sizes)}")
@@ -264,38 +265,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         a_values[2*i + 1] = ay
     a.x.scatter_forward()
 
-    # Compute initial force vector
-    # F_init = dolfinx.fem.petsc.assemble_vector(F_form)
-    # F_init.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # F_init.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-    # M_lumped = dolfinx.fem.petsc.assemble_vector(M_lumped_form)
-    # M_lumped.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # M_lumped.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Assemble the stiffness term K*u_n (part of the residual)
-    # K_u_form = dolfinx.fem.form(ufl.replace(P_du, {u: u}))  # This gets K*u_n
-    # K_u = dolfinx.fem.petsc.assemble_vector(K_u_form)
-    # K_u.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # K_u.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Assemble the external force vector
-    # F_ext_form = dolfinx.fem.form(-ufl.derivative(external_work, u, u_test))
-    # F_ext = dolfinx.fem.petsc.assemble_vector(F_ext_form)
-    # F_ext.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # F_ext.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Calculate F_n - K*u_n
-    # F_rhs = F_ext.copy()
-    # F_rhs.axpy(-1.0, K_u)  # F_rhs = F_ext - K_u
-
-    # # Initial acceleration = M^(-1) * (F_n - K*u_n)
-    # with F_rhs.localForm() as F_local, M_lumped.localForm() as M_local, a.x.petsc_vec.localForm() as a_local:
-    #     a_local.pointwiseDivide(F_local, M_local)
-
-    # dolfinx.fem.set_bc(a.x.array, bcs_a)  # Enforce BCs
-    # a.x.scatter_forward()
-
-    # v.x.scatter_forward()
     stime = time.time()
     step = 0
     snapshot_interval = 1
@@ -303,17 +272,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     #----------
     # Main loop
     #----------
-    # setup postprocessing:
-    error_squared_total_sum = 0
-    u_squared_total_sum = 0
-
-
-
-    def u_exact_x(x, y, t):
-        return np.sin(4.*np.pi*x) * np.sin(2.*np.pi*y) * np.sin(4.*np.pi*(t-0.1))
-
-    def u_exact_y(x, y, t):
-        return np.sin(4.*np.pi*x) * np.sin(2.*np.pi*y) * np.sin(4.*np.pi*(t+0.3))
 
     dof_coords = V_t.tabulate_dof_coordinates()[:, :2]
     # Only drop z-dimension
@@ -322,7 +280,7 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     if comm.rank == 0:
         pbar = tqdm(total=total_time, desc="Integrating")
 
-
+    stime = time.time()
     while float(t.value) < total_time:
         # Update u
         with u.x.petsc_vec.localForm() as u_local, \
@@ -348,11 +306,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
             t_ = t.value + delta_t.value
             b_values[0::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
             b_values[1::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
-            # t_ = t.value + delta_t.value
-            # b_values[0::2] += _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
-            # b_values[1::2] += _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
-            # b_values[0::2] /= 2
-            # b_values[1::2] /= 2
         b.x.scatter_forward()
 
         # Update acceleration
@@ -383,50 +336,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         u.x.scatter_forward()
         v.x.scatter_forward()
         a.x.scatter_forward()
-        
-        u_linear.interpolate(u)
-        # Extract DOFs and coordinates from u_linear
-        dof_coords = V_linear.tabulate_dof_coordinates()[:, :2]
-        ux_local = u_linear.x.array[0::2]
-        uy_local = u_linear.x.array[1::2]
-        x_local = dof_coords[:, 0]
-        y_local = dof_coords[:, 1]
-
-        local_data = np.column_stack((x_local, y_local, ux_local, uy_local))
-
-        # Gather on rank 0
-        all_data = comm.gather(local_data, root=0)
-
-        if comm.rank == 0:
-            # Stack everything together
-            global_data = np.vstack(all_data)
-
-            # Same logic from here down
-            df = pd.DataFrame(global_data, columns=["x", "y", "ux", "uy"])
-            df_sorted = df.sort_values(by=["y", "x"]).reset_index(drop=True)
-
-            dim_x = mesh_parameters["nx"] + 1
-            dim_y = mesh_parameters["ny"] + 1
-
-            X = df_sorted["x"].to_numpy().reshape((dim_y, dim_x))
-            Y = df_sorted["y"].to_numpy().reshape((dim_y, dim_x))
-            ux_num = df_sorted["ux"].to_numpy().reshape((dim_y, dim_x))
-            uy_num = df_sorted["uy"].to_numpy().reshape((dim_y, dim_x))
-
-            t_ = t.value + delta_t.value
-            ux_ex = u_exact_x(X, Y, t_)
-            uy_ex = u_exact_y(X, Y, t_)
-
-            u_num = np.stack((ux_num.flatten(), uy_num.flatten()), axis=1)
-            u_ex = np.stack((ux_ex.flatten(), uy_ex.flatten()), axis=1)
-
-            u_err = u_num - u_ex
-            u_err_squared = u_err**2
-            u_ex_squared = u_ex ** 2
-            sum_u_err_squared = np.sum(u_err_squared)
-            sum_u_squared = np.sum(u_ex_squared)
-            error_squared_total_sum += sum_u_err_squared
-            u_squared_total_sum += sum_u_squared
 
         t.value += float(delta_t)
         delta_t.value = float(ufl.conditional(ufl.lt(delta_t0,total_time-t), 
@@ -444,38 +353,33 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
             pbar.update(float(delta_t))
         
         step += 1
+    ftime = time.time()
+    runtimes.append(ftime-stime)
 
     comm = MPI.COMM_WORLD
 
-    # Gather full solution vector to rank 0
-    x_global = len(u.x.array)
-
-
     # Only rank 0 will get the full vector
     if comm.rank == 0:
+        print(f"runtimes: {runtimes}")
         pbar.close()
-        print(f"Simulation took {time.time() - stime:.2f}s to run.")
-        print(f"N steps was {step}.")
-        L2_err = (error_squared_total_sum*delta_t0/(mesh_parameters["nx"])**2)**0.5
-        L2_u = (u_squared_total_sum*delta_t0/(mesh_parameters["nx"])**2)**0.5
-        L2_u_rel = L2_err / L2_u
-        l2_err_plot.append(L2_u_rel)
-    
-    delta_xs = 1 / np.array(grid_sizes_run)
 
-    plt.figure(figsize=(10, 5))
-    x1 = delta_xs[0]
-    y1 = l2_err_plot[0]
-    x2 = delta_xs[0]
-    y2 = l2_err_plot[0]
-    ref_line = y1 * (delta_xs / x1)  # Slope 1
-    ref_line2 = y2 * (delta_xs / x2)**2  # Slope 2
-    plt.loglog(delta_xs, l2_err_plot, marker='o', label="L2 Error", color="black")
-    plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
-    plt.loglog(delta_xs, ref_line2, "--", label="Order 2")
-    plt.xlabel("Mesh size (h)")
-    plt.ylabel("L2 error")
-    plt.legend()
-    plt.grid(True, which="both")
-    plt.savefig("convergence_fencisx_loglog", dpi=300)
-    plt.show()
+if comm.rank == 0:
+    print(f"runtimes: {runtimes}")
+
+    # delta_xs = 1 / np.array(grid_sizes_run)
+    # plt.figure(figsize=(10, 5))
+    # x1 = delta_xs[0]
+    # y1 = l2_err_plot[0]
+    # x2 = delta_xs[0]
+    # y2 = l2_err_plot[0]
+    # ref_line = y1 * (delta_xs / x1)  # Slope 1
+    # ref_line2 = y2 * (delta_xs / x2)**2  # Slope 2
+    # plt.loglog(delta_xs, l2_err_plot, marker='o', label="L2 Error", color="black")
+    # plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
+    # plt.loglog(delta_xs, ref_line2, "--", label="Order 2")
+    # plt.xlabel("Mesh size (h)")
+    # plt.ylabel("L2 error")
+    # plt.legend()
+    # plt.grid(True, which="both")
+    # plt.savefig("convergence_fencisx_loglog", dpi=300)
+    # plt.show()

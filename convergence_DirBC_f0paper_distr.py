@@ -468,10 +468,10 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     y1 = l2_err_plot[0]
     x2 = delta_xs[0]
     y2 = l2_err_plot[0]
-    ref_line = y1 * (delta_xs / x1)  # Slope 1
+    # ref_line = y1 * (delta_xs / x1)  # Slope 1
     ref_line2 = y2 * (delta_xs / x2)**2  # Slope 2
     plt.loglog(delta_xs, l2_err_plot, marker='o', label="L2 Error", color="black")
-    plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
+    # plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
     plt.loglog(delta_xs, ref_line2, "--", label="Order 2")
     plt.xlabel("Mesh size (h)")
     plt.ylabel("L2 error")
