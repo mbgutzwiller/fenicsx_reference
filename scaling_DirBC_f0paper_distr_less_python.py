@@ -11,9 +11,6 @@ import time
 import pandas as pd
 from tqdm import tqdm
 
-dolfinx.log.set_output_file("output_file_dolfinx")
-dolfinx.log.set_log_level(dolfinx.log.LogLevel.INFO)
-
 comm = MPI.COMM_WORLD
 
 # Characteristic dimensions of the domain
@@ -40,7 +37,7 @@ material_properties = {
     'c2': 0,
 }
 l2_err_plot = []
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280]
+grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320][::-1]
 grid_sizes_run = []
 runtimes = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
@@ -231,10 +228,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         u_linear.interpolate(u)
         xdmf.write_function(u_linear, t.value)
 
-    # if comm.rank == 0:
-    #     print ('RESOLUTION STATUS')
-    #     sys.stdout.flush()
-
     current_time = float(t.value)
     x = mesh.geometry.x
 
@@ -282,6 +275,19 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
 
     if comm.rank == 0:
         pbar = tqdm(total=total_time, desc="Integrating")
+    
+    with u.x.petsc_vec.localForm() as u_local, \
+    v.x.petsc_vec.localForm() as v_local, \
+    a.x.petsc_vec.localForm() as a_local, \
+    u_new.x.petsc_vec.localForm() as u_new_local:
+    # Step 1: temp = v_local
+        temp_v = v_local.duplicate()
+    
+    with v.x.petsc_vec.localForm() as v_local, \
+            a_new.x.petsc_vec.localForm() as a_new_local, \
+            a.x.petsc_vec.localForm() as a_local, \
+            v_new.x.petsc_vec.localForm() as v_new_local:
+        temp_a = a_local.duplicate() 
 
     stime = time.time()
     while float(t.value) < total_time:
@@ -290,26 +296,29 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
             v.x.petsc_vec.localForm() as v_local, \
             a.x.petsc_vec.localForm() as a_local, \
             u_new.x.petsc_vec.localForm() as u_new_local:
-            u_new_local.array[:] = u_local.array + float(delta_t) * v_local.array + 0.5 * float(delta_t)**2 * a_local.array
-        dolfinx.fem.set_bc(u_new.x.array, bcs_u)
-        u_new.x.scatter_forward()
-        
-        # Update body forces
-        local_size = b.x.array.shape[0] // 2
-        # x = mesh.geometry.x[:local_size]
-        # x0 = x[:, 0]
-        # x1 = x[:, 1]
-        dof_coords = V_t.tabulate_dof_coordinates()
-        x0 = dof_coords[:, 0]
-        x1 = dof_coords[:, 1]
+                # u_new_local.array[:] = u_local.array + float(delta_t) * v_local.array + 0.5 * float(delta_t)**2 * a_local.array
+                # temp_v.copy(v_local)
+                v_local.axpy(0.5 * delta_t, a_local)
+                # u_new_local.copy(u_local)
+                u_new_local.axpy(delta_t, temp_v)
 
-        # Calulation of body forces costs about half of total time...
-        with b.x.petsc_vec.localForm() as b_local:
-            b_array = b_local.array
-            t_ = t.value + delta_t.value
-            b_values[0::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
-            b_values[1::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
-        b.x.scatter_forward()
+                # Step 4: scatter ghost values if needed
+        u_new.x.scatter_forward()
+        dolfinx.fem.petsc.set_bc(u_new.x.petsc_vec, bcs_u)
+        
+        # # Update body forces
+        # local_size = b.x.array.shape[0] // 2
+        # dof_coords = V_t.tabulate_dof_coordinates()
+        # x0 = dof_coords[:, 0]
+        # x1 = dof_coords[:, 1]
+
+        # # Calulation of body forces costs about half of total time...
+        # with b.x.petsc_vec.localForm() as b_local:
+        #     b_array = b_local.array
+        #     t_ = t.value + delta_t.value
+        #     b_values[0::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
+        #     b_values[1::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
+        # b.x.scatter_forward()
 
         # Update acceleration
         F = dolfinx.fem.petsc.assemble_vector(F_form)
@@ -326,22 +335,24 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
             a_new.x.petsc_vec.localForm() as a_new_local, \
             a.x.petsc_vec.localForm() as a_local, \
             v_new.x.petsc_vec.localForm() as v_new_local:
-            v_new_local.array[:] = v_local.array + 0.5 * float(delta_t) * (a_new_local.array + a_local.array)    
-        dolfinx.fem.set_bc(v_new.x.array, bcs_v)
-        v_new.x.scatter_forward()
+            # v_new_local.array[:] = v_local.array + 0.5 * float(delta_t) * (a_new_local.array + a_local.array)
+            # a_sum_temp = a + a_new
+            # temp_a.copy()
+            a_local.axpy(1.0, a_new_local)
 
-        # Copy i+1 into i
-        u.x.array[:] = u_new.x.array
-        v.x.array[:] = v_new.x.array
-        a.x.array[:] = a_new.x.array
-        # print(type(u.x))  # Should output: <class 'petsc4py.PETSc.Vec'>
-
-        # u.x.petsc_vec.copy(u_new.x.petsc_vec)
-        # v.x.petsc_vec.copy(v_new.x.petsc_vec)
-        # a.x.petsc_vec.copy(a_new.x.petsc_vec)
+            # v_new = v + 0.5 * dt * a_sum_temp
+            # v_new_local.copy(v)
+            v_new_local.axpy(0.5 * delta_t, temp_a)
 
         
-        # Is this needed?
+        v_new.x.scatter_forward()
+        # dolfinx.fem.set_bc(v_new.x.array, bcs_v)
+        dolfinx.fem.petsc.set_bc(v_new.x.petsc_vec, bcs_u)
+
+
+        u = u_new
+        v = v_new
+        a = a_new
         u.x.scatter_forward()
         v.x.scatter_forward()
         a.x.scatter_forward()
