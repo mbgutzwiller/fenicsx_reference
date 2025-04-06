@@ -13,37 +13,91 @@ import matplotlib.pyplot as plt
 # # runtimes_4 = [392.0569896697998, 24.783448696136475, 10.869752645492554, 3.8268392086029053, 1.9854729175567627, 0.8879952430725098, 0.38422060012817383, 0.11449027061462402, 0.05503129959106445][::-1]
 # runtimes_2 = [0.05579066276550293, 0.09388446807861328, 0.2580840587615967, 0.9472675323486328, 2.638576030731201, 5.659003496170044, 16.6921808719635, 39.84356498718262, 662.3824572563171]
 
-[10, 20, 40, 80, 120, 160, 240, 320, 640, 1280]
+grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280]
 
-runtimes_1 = [5245.4585609436035, 539.9593379497528, 68.29340410232544, 29.119383573532104, 8.83642292022705, 3.857235908508301, 1.3382577896118164, 0.25045204162597656, 0.07312464714050293, 0.02946925163269043]
+# runtimes_1 = np.array([5245.4585609436035, 539.9593379497528, 68.29340410232544, 29.119383573532104, 8.83642292022705, 3.857235908508301, 1.3382577896118164, 0.25045204162597656, 0.07312464714050293, 0.02946925163269043])[::-1]
+# runtimes_8 = np.array([1073.040122270584, 123.48852014541626, 14.983920574188232, 7.144298791885376, 2.8711507320404053, 1.6053752899169922, 0.882249116897583, 0.3264124393463135, 0.13974738121032715, 0.07031011581420898])[::-1]
+# runtimes_4 = np.array([0.047785043716430664, 0.09652447700500488, 0.2727539539337158, 0.8538565635681152, 2.0879569053649902, 3.8614442348480225, 10.129594087600708, 23.91997003555298, 180.03997802734375, 1583.969745874405])
+# runtimes_2 = np.array([0.05838775634765625, 0.09331035614013672, 0.2449815273284912, 0.9723560810089111, 2.8370614051818848, 5.996332883834839, 17.881193161010742, 39.222891092300415, 342.64161443710327, 2747.7665143013])
+
+# runtimes_1 = np.array([5245.4585609436035, 539.9593379497528, 68.29340410232544, 29.119383573532104, 8.83642292022705, 3.857235908508301, 1.3382577896118164, 0.25045204162597656, 0.07312464714050293, 0.02946925163269043])[::-1]
+# runtimes_8 = np.array([0.018592357635498047, 0.03673291206359863, 0.09095096588134766, 0.28411078453063965, 0.6962318420410156, 1.432126760482788, 4.503163814544678, 10.559955358505249, 86.55353617668152, 863.7052867412567, 7068.762294054031])
+# runtimes_4 = np.array([0.032782793045043945, 0.03673148155212402, 0.1002497673034668, 0.3889632225036621, 1.0410065650939941, 2.3468754291534424, 7.531053304672241, 17.82519030570984, 146.44744968414307, 1373.698133468628, 11208.580198526382])
+# runtimes_2 = np.array([0.05838775634765625, 0.09331035614013672, 0.2449815273284912, 0.9723560810089111, 2.8370614051818848, 5.996332883834839, 17.881193161010742, 39.222891092300415, 342.64161443710327, 2747.7665143013])
+
+grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280, 2560]
+runtimes_8 = np.array([0.018592357635498047, 0.03673291206359863, 0.09095096588134766, 0.28411078453063965, 0.6962318420410156, 1.432126760482788, 4.503163814544678, 10.559955358505249, 86.55353617668152, 863.7052867412567, 7068.762294054031])
+runtimes_4 = np.array([0.032782793045043945, 0.03673148155212402, 0.1002497673034668, 0.3889632225036621, 1.0410065650939941, 2.3468754291534424, 7.531053304672241, 17.82519030570984, 146.44744968414307, 1373.698133468628, 11208.580198526382])
+runtimes_2 = np.array([0.017388343811035156, 0.03861045837402344, 0.12466835975646973, 0.5960128307342529, 1.796077013015747, 4.006959676742554, 13.45595121383667, 31.597405672073364, 303.06094455718994, 2464.5865709781647, 19935.111971616745])
+runtimes_1 = np.array([0.015282392501831055, 0.04157876968383789, 0.17270183563232422, 1.027972936630249, 3.2423171997070312, 7.51666784286499, 25.540014028549194, 59.6126389503479, 557.4289293289185, 4611.060019731522, 38150.17436861992])
 
 
 _index = -1
 C_loglog_3 = runtimes_4[_index] / (grid_sizes[_index])**3  # reference line for 2nd order convergence
-C_loglog_4 = runtimes_16[_index] / (grid_sizes[_index])**4  # reference line for 2nd order convergence
-C_loglog_1 = runtimes_16[0] / (grid_sizes[0])  # reference line for 2nd order convergence
+C_loglog_4 = runtimes_8[_index] / (grid_sizes[_index])**4  # reference line for 2nd order convergence
+C_loglog_1 = runtimes_1[0] / (grid_sizes[0])  # reference line for 2nd order convergence
+
+
+# plt.figure(figsize=(8, 5))
+# plt.loglog(grid_sizes, runtimes_8, '--o', markersize=8,label="8 Cores", color="blue")
+# plt.loglog(grid_sizes, runtimes_4, '--o', markersize=8,label="4 Cores", color="purple")
+# plt.loglog(grid_sizes, runtimes_2, '--o', markersize=8,label="2 Cores", color="green")
+# plt.loglog(grid_sizes, runtimes_1, '--o', markersize=8,label="1 Core", color="orange")
+
+# plt.loglog(grid_sizes, C_loglog_1 * np.array(grid_sizes), "--", label="Slope = 1", alpha=0.5, color="black")
+# plt.loglog(grid_sizes, C_loglog_3 * np.array(grid_sizes)**3, label="Slope = 3", alpha=0.5, color="black")
+# # plt.loglog(grid_sizes, C_loglog_4 * np.array(grid_sizes)**4, ":", label="Slope = 4", alpha=0.5, color="black")
+
+# plt.ylabel("Compute Time [s]")
+# plt.xlabel("Grid size [-]")
+# plt.legend()
+# plt.grid(True, which="both")
+# plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_strong_final", dpi=600)
+
+# plt.show()
 
 
 plt.figure(figsize=(8, 5))
-plt.loglog(grid_sizes, runtimes_16, 'k--o', markersize=8, label="16 Cores", color="green")
-plt.loglog(grid_sizes, runtimes_8, 'k--o', markersize=8,label="8 Cores", color="blue")
-plt.loglog(grid_sizes, runtimes_4, 'k--o', markersize=8,label="4 Cores", color="purple")
-plt.loglog(grid_sizes, runtimes_2, 'k--o', markersize=8,label="2 Cores", color="cyan")
+plt.semilogx(grid_sizes, runtimes_1/runtimes_8, '--o', markersize=8,label="8 Cores", color="blue")
+plt.semilogx(grid_sizes, runtimes_1/runtimes_4, '--o', markersize=8,label="4 Cores", color="purple")
+plt.semilogx(grid_sizes, runtimes_1/runtimes_2, '--o', markersize=8,label="2 Cores", color="green")
+plt.semilogx(grid_sizes, runtimes_1/runtimes_1, '--o', markersize=8,label="1 Core reference", color="orange")
 
-plt.loglog(grid_sizes, C_loglog_1 * np.array(grid_sizes), "--", label="Slope = 1", alpha=0.5, color="black")
-plt.loglog(grid_sizes, C_loglog_3 * np.array(grid_sizes)**3, label="Slope = 3", alpha=0.5, color="black")
+# plt.loglog(grid_sizes, C_loglog_1 * np.array(grid_sizes), "--", label="Slope = 1", alpha=0.5, color="black")
+# plt.loglog(grid_sizes, C_loglog_3 * np.array(grid_sizes)**3, label="Slope = 3", alpha=0.5, color="black")
 # plt.loglog(grid_sizes, C_loglog_4 * np.array(grid_sizes)**4, ":", label="Slope = 4", alpha=0.5, color="black")
 
-plt.ylabel("Compute Time [s]")
+plt.ylabel("Relative speedup [-]")
 plt.xlabel("Grid size [-]")
+plt.title("Strong Scaling")
 plt.legend()
 plt.grid(True, which="both")
-plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv", dpi=600)
+plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_strong_final", dpi=600)
 
 plt.show()
+plt.close()
 
-# a = 3 * 3600
-# b = 51*60 + 34 * 60
-# c = 34 + 7
-# print(a + b + c)
+runtimes_8 = [10.534351348876953, 87.90579390525818, 856.9799156188965]
+# runtimes at 1 with grid size half as big as runtime 8
+runtimes_4 = [9.59804391860962, 72.46065735816956, 685.5793178081512]
+runtimes_2 = [7.914881467819214, 63.189791202545166, 604.4840333461761]
+runtimes_1 = [7.478263854980469, 59.739352226257324, 562.0295383930206]
+grid_per_cores_1 = [160, 320, 640]
+np.array([int(gs*4**(1/3)) for gs in [160, 320, 640]])
 
+cores = [1, 2, 4, 8]
+
+plt.figure(figsize=(8, 5))
+
+for runtime_1_, runtime_2_, runtime_4_, runtime_8_, grid_per_core_ in zip(runtimes_1, runtimes_2, runtimes_4, runtimes_8, grid_per_cores_1):
+    plt.plot(cores, runtime_1_ / np.array([runtime_1_, runtime_2_, runtime_4_, runtime_8_]), '--o', markersize=8,label=f"Grid size per core: {grid_per_core_}")
+
+plt.ylabel("Efficiency [-]")
+plt.xlabel("No. of cores [-]")
+plt.title("Weak Scaling")
+plt.legend()
+plt.grid(True, which="both")
+plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_weak_final", dpi=600)
+
+plt.show()
+plt.close()

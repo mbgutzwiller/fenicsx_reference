@@ -40,7 +40,9 @@ material_properties = {
     'c2': 0,
 }
 l2_err_plot = []
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280]
+# grid_sizes = [320, 640]
+# grid_sizes = [160, 320]
+grid_sizes = np.array([int(gs*1**(1/3)) for gs in [640]])
 grid_sizes_run = []
 runtimes = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
@@ -226,10 +228,10 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     delta_t.value = delta_t0
 
     # Create the file once, in write mode, collectively on *all* ranks
-    with dolfinx.io.XDMFFile(comm, OTP_settings['xdmf_filename'], "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        u_linear.interpolate(u)
-        xdmf.write_function(u_linear, t.value)
+    # with dolfinx.io.XDMFFile(comm, OTP_settings['xdmf_filename'], "w") as xdmf:
+    #     xdmf.write_mesh(mesh)
+    #     u_linear.interpolate(u)
+    #     xdmf.write_function(u_linear, t.value)
 
     # if comm.rank == 0:
     #     print ('RESOLUTION STATUS')
@@ -353,10 +355,10 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         
         ts = np.concatenate((ts,[t.value]))
         
-        if step % snapshot_interval == 0:
-            with dolfinx.io.XDMFFile(comm, OTP_settings['xdmf_filename'], 'a') as xdmf_file:
-                u_linear.interpolate(u)
-                xdmf_file.write_function(u_linear, t.value)
+        # if step % snapshot_interval == 0:
+        #     with dolfinx.io.XDMFFile(comm, OTP_settings['xdmf_filename'], 'a') as xdmf_file:
+        #         u_linear.interpolate(u)
+        #         xdmf_file.write_function(u_linear, t.value)
         
         if comm.rank == 0:
             pbar.update(float(delta_t))
