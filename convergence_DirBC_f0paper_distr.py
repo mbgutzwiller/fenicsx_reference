@@ -37,7 +37,7 @@ material_properties = {
     'c2': 0,
 }
 l2_err_plot = []
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 800]
+grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640]
 grid_sizes_run = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     grid_sizes_run.append(grid_size)
@@ -71,7 +71,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         h_min = min(h_min)  
     h_min = MPI.COMM_WORLD.bcast(h_min, root=0) #Broadcast to every processor the global minimum of h.
 
-    # Geometrical regions  
     def top(x):
         return np.isclose(x[1], geometry_parameters["Ly"])
     def bottom(x):
@@ -81,7 +80,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     def left (x):
         return np.isclose(x[0], 0.)
 
-    # Geometrical sets
     top_facets = dolfinx.mesh.locate_entities_boundary(mesh, fdim, top)
     bottom_facets = dolfinx.mesh.locate_entities_boundary(mesh, fdim, bottom)
     right_facets = dolfinx.mesh.locate_entities_boundary(mesh, fdim, right)
@@ -103,7 +101,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
                             tagged_facets[tagged_facets_sorted], 
                             tag_values[tagged_facets_sorted])
 
-    # Domain and subdomain measures
     # dx = ufl.Measure("dx", domain=mesh, metadata={"quadrature_degree": 4})
     dx = ufl.Measure("dx", domain=mesh)                         # Domain measure
     ds = ufl.Measure("ds", domain=mesh, subdomain_data=mt)      # External Boundary measure
@@ -264,50 +261,14 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         a_values[2*i + 1] = ay
     a.x.scatter_forward()
 
-    # Compute initial force vector
-    # F_init = dolfinx.fem.petsc.assemble_vector(F_form)
-    # F_init.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # F_init.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-    # M_lumped = dolfinx.fem.petsc.assemble_vector(M_lumped_form)
-    # M_lumped.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # M_lumped.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Assemble the stiffness term K*u_n (part of the residual)
-    # K_u_form = dolfinx.fem.form(ufl.replace(P_du, {u: u}))  # This gets K*u_n
-    # K_u = dolfinx.fem.petsc.assemble_vector(K_u_form)
-    # K_u.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # K_u.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Assemble the external force vector
-    # F_ext_form = dolfinx.fem.form(-ufl.derivative(external_work, u, u_test))
-    # F_ext = dolfinx.fem.petsc.assemble_vector(F_ext_form)
-    # F_ext.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-    # F_ext.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
-
-    # # Calculate F_n - K*u_n
-    # F_rhs = F_ext.copy()
-    # F_rhs.axpy(-1.0, K_u)  # F_rhs = F_ext - K_u
-
-    # # Initial acceleration = M^(-1) * (F_n - K*u_n)
-    # with F_rhs.localForm() as F_local, M_lumped.localForm() as M_local, a.x.petsc_vec.localForm() as a_local:
-    #     a_local.pointwiseDivide(F_local, M_local)
-
-    # dolfinx.fem.set_bc(a.x.array, bcs_a)  # Enforce BCs
-    # a.x.scatter_forward()
-
-    # v.x.scatter_forward()
+   
     stime = time.time()
     step = 0
     snapshot_interval = 1
 
-    #----------
-    # Main loop
-    #----------
     # setup postprocessing:
     error_squared_total_sum = 0
     u_squared_total_sum = 0
-
-
 
     def u_exact_x(x, y, t):
         return np.sin(4.*np.pi*x) * np.sin(2.*np.pi*y) * np.sin(4.*np.pi*(t-0.1))
@@ -316,8 +277,7 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         return np.sin(4.*np.pi*x) * np.sin(2.*np.pi*y) * np.sin(4.*np.pi*(t+0.3))
 
     dof_coords = V_t.tabulate_dof_coordinates()[:, :2]
-    # Only drop z-dimension
-    node_coords = dof_coords[:, :2]  # shape: (1681, 2)
+    node_coords = dof_coords[:, :2]  # dropping z dim 
 
     if comm.rank == 0:
         pbar = tqdm(total=total_time, desc="Integrating")
