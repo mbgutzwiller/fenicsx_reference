@@ -45,7 +45,7 @@ S_pulse = 5e-3
 l2_err_plot = []
 # grid_sizes = [320, 640]
 # grid_sizes = [160, 320]
-grid_sizes = np.array([int(gs*1**(1/3)) for gs in [640]])
+grid_sizes = np.array([int(gs*1**(1/3)) for gs in [80]])
 grid_sizes_run = []
 runtimes = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
