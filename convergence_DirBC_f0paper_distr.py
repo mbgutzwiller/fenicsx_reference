@@ -11,6 +11,8 @@ import time
 import pandas as pd
 from tqdm import tqdm
 
+plt.rcParams['axes.labelsize'] = 14      # X and Y labels
+
 comm = MPI.COMM_WORLD
 
 # Characteristic dimensions of the domain
@@ -37,7 +39,8 @@ material_properties = {
     'c2': 0,
 }
 l2_err_plot = []
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640]
+# grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640]
+grid_sizes = [40, 80, 120, 160, 240]
 grid_sizes_run = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     grid_sizes_run.append(grid_size)
@@ -420,22 +423,23 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         L2_u = (u_squared_total_sum*delta_t0/(mesh_parameters["nx"])**2)**0.5
         L2_u_rel = L2_err / L2_u
         l2_err_plot.append(L2_u_rel)
+        print(f"l2 error fenicsx: {l2_err_plot}")
     
     delta_xs = 1 / np.array(grid_sizes_run)
 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(8, 5))
     x1 = delta_xs[0]
     y1 = l2_err_plot[0]
     x2 = delta_xs[0]
     y2 = l2_err_plot[0]
     # ref_line = y1 * (delta_xs / x1)  # Slope 1
     ref_line2 = y2 * (delta_xs / x2)**2  # Slope 2
-    plt.loglog(delta_xs, l2_err_plot, marker='o', label="L2 Error", color="black")
+    plt.loglog(delta_xs, l2_err_plot, marker='o', color="blue")
     # plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
-    plt.loglog(delta_xs, ref_line2, "--", label="Order 2")
+    plt.loglog(delta_xs, ref_line2, "--", label="Order 2", color="black")
     plt.xlabel("Mesh size (h)")
     plt.ylabel("L2 error")
     plt.legend()
     plt.grid(True, which="both")
-    plt.savefig("convergence_fencisx_loglog", dpi=300)
+    plt.savefig("convergence_fencisx_final", dpi=600)
     plt.show()

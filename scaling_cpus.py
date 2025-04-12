@@ -25,12 +25,40 @@ grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280]
 # runtimes_4 = np.array([0.032782793045043945, 0.03673148155212402, 0.1002497673034668, 0.3889632225036621, 1.0410065650939941, 2.3468754291534424, 7.531053304672241, 17.82519030570984, 146.44744968414307, 1373.698133468628, 11208.580198526382])
 # runtimes_2 = np.array([0.05838775634765625, 0.09331035614013672, 0.2449815273284912, 0.9723560810089111, 2.8370614051818848, 5.996332883834839, 17.881193161010742, 39.222891092300415, 342.64161443710327, 2747.7665143013])
 
-grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280, 2560]
-runtimes_8 = np.array([0.018592357635498047, 0.03673291206359863, 0.09095096588134766, 0.28411078453063965, 0.6962318420410156, 1.432126760482788, 4.503163814544678, 10.559955358505249, 86.55353617668152, 863.7052867412567, 7068.762294054031])
-runtimes_4 = np.array([0.032782793045043945, 0.03673148155212402, 0.1002497673034668, 0.3889632225036621, 1.0410065650939941, 2.3468754291534424, 7.531053304672241, 17.82519030570984, 146.44744968414307, 1373.698133468628, 11208.580198526382])
-runtimes_2 = np.array([0.017388343811035156, 0.03861045837402344, 0.12466835975646973, 0.5960128307342529, 1.796077013015747, 4.006959676742554, 13.45595121383667, 31.597405672073364, 303.06094455718994, 2464.5865709781647, 19935.111971616745])
-runtimes_1 = np.array([0.015282392501831055, 0.04157876968383789, 0.17270183563232422, 1.027972936630249, 3.2423171997070312, 7.51666784286499, 25.540014028549194, 59.6126389503479, 557.4289293289185, 4611.060019731522, 38150.17436861992])
+# grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640, 1280, 2560]
+# runtimes_8 = np.array([0.018592357635498047, 0.03673291206359863, 0.09095096588134766, 0.28411078453063965, 0.6962318420410156, 1.432126760482788, 4.503163814544678, 10.559955358505249, 86.55353617668152, 863.7052867412567, 7068.762294054031])
+# runtimes_4 = np.array([0.032782793045043945, 0.03673148155212402, 0.1002497673034668, 0.3889632225036621, 1.0410065650939941, 2.3468754291534424, 7.531053304672241, 17.82519030570984, 146.44744968414307, 1373.698133468628, 11208.580198526382])
+# runtimes_2 = np.array([0.017388343811035156, 0.03861045837402344, 0.12466835975646973, 0.5960128307342529, 1.796077013015747, 4.006959676742554, 13.45595121383667, 31.597405672073364, 303.06094455718994, 2464.5865709781647, 19935.111971616745])
+# runtimes_1 = np.array([0.015282392501831055, 0.04157876968383789, 0.17270183563232422, 1.027972936630249, 3.2423171997070312, 7.51666784286499, 25.540014028549194, 59.6126389503479, 557.4289293289185, 4611.060019731522, 38150.17436861992])
 
+grid_sizes = [50, 100, 200, 400, 800, 1200, 1600]
+runtimes_8_no_comp_1 = np.array([0.054840087890625, 0.14452672004699707, 0.6049492359161377, 4.079949378967285, 34.46140265464783, 117.29124140739441, 280.72062516212463, 1100.7928178310394])
+runtimes_8_no_comp_2 = np.array([0.056464195251464844, 0.14574027061462402, 0.6019086837768555, 4.1025495529174805, 33.84459614753723, 117.68481302261353, 284.8850157260895])
+runtimes_8_1 = np.array([0.185896635055542, 0.1906747817993164, 0.734595537185669, 4.568392753601074, 36.55027961730957, 123.25938320159912, 291.4155168533325, 1124.8723697662354])
+runtimes_8_2 = np.array([0.17632770538330078, 0.1921844482421875, 0.7522869110107422, 4.610728740692139, 35.93956685066223, 123.62064671516418, 295.76451444625854])
+runtimes_8_no_comp = 0.5 * (runtimes_8_no_comp_1 + runtimes_8_no_comp_2)
+runtimes_8 = 0.5 * (runtimes_8_1 + runtimes_8_2)
+
+runtimes_4_no_comp_1 = np.array([0.056864023208618164, 0.17576122283935547, 0.884645938873291, 6.265591621398926, 50.36533761024475, 215.80483675003052, 503.88017892837524])
+runtimes_4_no_comp_2 = np.array([0.056864023208618164, 0.17576122283935547, 0.884645938873291, 6.265591621398926, 50.36533761024475, 215.80483675003052, 503.88017892837524])
+runtimes_4_1 = np.array([0.05841326713562012, 0.1979074478149414, 0.9450676441192627, 6.342120170593262, 50.398202657699585, 214.8847336769104, 498.85911655426025])
+runtimes_4_2 = np.array([0.12332010269165039, 0.2527587413787842, 1.113518238067627, 6.999448776245117, 53.36651349067688, 222.59208703041077, 511.7769203186035])
+runtimes_4_no_comp = 0.5 * (runtimes_4_no_comp_1 + runtimes_4_no_comp_2)
+runtimes_4 = 0.5 * (runtimes_4_1 + runtimes_4_2)
+
+runtimes_2_no_comp_1 = np.array([0.0671844482421875, 0.25754809379577637, 1.490647792816162, 10.857361555099487, 86.56146621704102, 378.98302817344666, 684.4104936122894])
+runtimes_2_no_comp_2 = np.array([0.08040356636047363, 0.2553443908691406, 1.4812216758728027, 10.895469665527344, 86.45625591278076, 380.4566376209259, 892.4988386631012])
+runtimes_2_1 = np.array([0.18172693252563477, 0.32312846183776855, 1.7119534015655518, 11.751078128814697, 90.33171844482422, 388.4628436565399, 702.1731469631195])
+runtimes_2_2 = np.array([0.19927358627319336, 0.3190596103668213, 1.7027771472930908, 11.779587745666504, 90.33070707321167, 390.03050661087036, 910.33598279953])
+runtimes_2_no_comp = 0.5 * (runtimes_2_no_comp_1 + runtimes_2_no_comp_2)
+runtimes_2 = 0.5 * (runtimes_2_1 + runtimes_2_2)
+
+runtimes_1_no_comp_1 = np.array([0.09231448173522949, 0.37784814834594727, 2.4785053730010986, 19.645519971847534, 207.126877784729, 703.5955436229706, 1674.9761474132538])
+runtimes_1_no_comp_2 = np.array([0.07947063446044922, 0.377335786819458, 2.506183385848999, 19.796936511993408, 210.28862309455872, 707.7731251716614, 1678.4910967350006])
+runtimes_1_1 = np.array([0.13295674324035645, 0.44735050201416016, 2.733935832977295, 20.68614387512207, 211.8379361629486, 715.5787074565887, 1697.0152480602264])
+runtimes_1_2 = np.array([0.12239289283752441, 0.44730305671691895, 2.7657859325408936, 20.854201316833496, 215.14520692825317, 719.9243547916412, 1700.710512638092])
+runtimes_1_no_comp = 0.5 * (runtimes_1_no_comp_1 + runtimes_1_no_comp_2)
+runtimes_1 = 0.5 * (runtimes_1_1 + runtimes_1_2)
 
 _index = -1
 C_loglog_3 = runtimes_4[_index] / (grid_sizes[_index])**3  # reference line for 2nd order convergence
@@ -57,47 +85,54 @@ C_loglog_1 = runtimes_1[0] / (grid_sizes[0])  # reference line for 2nd order con
 # plt.show()
 
 
+# plt.figure(figsize=(8, 5))
+# plt.semilogx(grid_sizes, runtimes_1/runtimes_8, '--o', markersize=8,label="8 Cores", color="blue")
+# plt.semilogx(grid_sizes, runtimes_1/runtimes_4, '--o', markersize=8,label="4 Cores", color="purple")
+# plt.semilogx(grid_sizes, runtimes_1/runtimes_2, '--o', markersize=8,label="2 Cores", color="green")
+# plt.semilogx(grid_sizes, runtimes_1/runtimes_1, '--o', markersize=8,label="1 Core reference", color="orange")
+
 plt.figure(figsize=(8, 5))
-plt.semilogx(grid_sizes, runtimes_1/runtimes_8, '--o', markersize=8,label="8 Cores", color="blue")
-plt.semilogx(grid_sizes, runtimes_1/runtimes_4, '--o', markersize=8,label="4 Cores", color="purple")
-plt.semilogx(grid_sizes, runtimes_1/runtimes_2, '--o', markersize=8,label="2 Cores", color="green")
-plt.semilogx(grid_sizes, runtimes_1/runtimes_1, '--o', markersize=8,label="1 Core reference", color="orange")
+plt.semilogx(grid_sizes, runtimes_1_no_comp/runtimes_8_no_comp, '--o', markersize=8,label="8 Cores", color="blue")
+plt.semilogx(grid_sizes, runtimes_1_no_comp/runtimes_4_no_comp, '--o', markersize=8,label="4 Cores", color="purple")
+plt.semilogx(grid_sizes, runtimes_1_no_comp/runtimes_2_no_comp, '--o', markersize=8,label="2 Cores", color="green")
+plt.semilogx(grid_sizes, runtimes_1_no_comp/runtimes_1_no_comp, '--o', markersize=8,label="1 Core reference", color="orange")
+
 
 # plt.loglog(grid_sizes, C_loglog_1 * np.array(grid_sizes), "--", label="Slope = 1", alpha=0.5, color="black")
 # plt.loglog(grid_sizes, C_loglog_3 * np.array(grid_sizes)**3, label="Slope = 3", alpha=0.5, color="black")
 # plt.loglog(grid_sizes, C_loglog_4 * np.array(grid_sizes)**4, ":", label="Slope = 4", alpha=0.5, color="black")
 
-plt.ylabel("Relative speedup [-]")
-plt.xlabel("Grid size [-]")
-plt.title("Strong Scaling")
+plt.ylabel("Relative Speedup [-]")
+plt.xlabel("Grid Size [-]")
+# plt.title("Strong Scaling")
 plt.legend()
 plt.grid(True, which="both")
-plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_strong_final", dpi=600)
+plt.savefig(f"/home/merrillg/FEM_reference/strong_scaling_1_8_strong_50_1600_8_1_w_comp", dpi=600)
 
 plt.show()
 plt.close()
 
-runtimes_8 = [10.534351348876953, 87.90579390525818, 856.9799156188965]
-# runtimes at 1 with grid size half as big as runtime 8
-runtimes_4 = [9.59804391860962, 72.46065735816956, 685.5793178081512]
-runtimes_2 = [7.914881467819214, 63.189791202545166, 604.4840333461761]
-runtimes_1 = [7.478263854980469, 59.739352226257324, 562.0295383930206]
-grid_per_cores_1 = [160, 320, 640]
-np.array([int(gs*4**(1/3)) for gs in [160, 320, 640]])
+# runtimes_8 = [10.534351348876953, 87.90579390525818, 856.9799156188965]
+# # runtimes at 1 with grid size half as big as runtime 8
+# runtimes_4 = [9.59804391860962, 72.46065735816956, 685.5793178081512]
+# runtimes_2 = [7.914881467819214, 63.189791202545166, 604.4840333461761]
+# runtimes_1 = [7.478263854980469, 59.739352226257324, 562.0295383930206]
+# grid_per_cores_1 = [160, 320, 640]
+# np.array([int(gs*4**(1/3)) for gs in [160, 320, 640]])
 
-cores = [1, 2, 4, 8]
+# cores = [1, 2, 4, 8]
 
-plt.figure(figsize=(8, 5))
+# plt.figure(figsize=(8, 5))
 
-for runtime_1_, runtime_2_, runtime_4_, runtime_8_, grid_per_core_ in zip(runtimes_1, runtimes_2, runtimes_4, runtimes_8, grid_per_cores_1):
-    plt.plot(cores, runtime_1_ / np.array([runtime_1_, runtime_2_, runtime_4_, runtime_8_]), '--o', markersize=8,label=f"Grid size: {grid_per_core_}")
+# for runtime_1_, runtime_2_, runtime_4_, runtime_8_, grid_per_core_ in zip(runtimes_1, runtimes_2, runtimes_4, runtimes_8, grid_per_cores_1):
+#     plt.plot(cores, runtime_1_ / np.array([runtime_1_, runtime_2_, runtime_4_, runtime_8_]), '--o', markersize=8,label=f"Grid size: {grid_per_core_}")
 
-plt.ylabel("Efficiency [-]")
-plt.xlabel("No. of cores [-]")
-plt.title("Weak Scaling")
-plt.legend()
-plt.grid(True, which="both")
-plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_weak_final", dpi=600)
+# plt.ylabel("Efficiency [-]")
+# plt.xlabel("No. of cores [-]")
+# plt.title("Weak Scaling")
+# plt.legend()
+# plt.grid(True, which="both")
+# plt.savefig(f"/home/merrillg/FEM_reference/scaling_fenicsx_for_conv_1_8_weak_final", dpi=600)
 
-plt.show()
-plt.close()
+# plt.show()
+# plt.close()

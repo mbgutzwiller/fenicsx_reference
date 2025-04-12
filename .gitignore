@@ -5,3 +5,9 @@ __pycache__/
 /petsc
 *.xdmf
 *.h5
+*.c
+*.so
+*.o
+*.c.cached
+*.json
+*.prof

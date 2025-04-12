@@ -10,6 +10,22 @@ import dolfinx.fem.petsc
 import time
 import pandas as pd
 from tqdm import tqdm
+import os
+import json
+
+try:
+    os.mkdir("cache")
+except FileExistsError:
+    pass
+
+jit_options = {
+    "cache_dir": "./cache/",
+    "cffi_extra_compile_args": ["-Ofast", "-march=native"],
+    # "quadrature_degree": 1
+}
+
+with open("dolfinx_jit_options.json", "w") as jit_options_file:
+    json.dump(jit_options, jit_options_file)
 
 dolfinx.log.set_output_file("output_file_dolfinx")
 dolfinx.log.set_log_level(dolfinx.log.LogLevel.INFO)
@@ -26,12 +42,9 @@ _rho = 1
 _mu = _c_mu**2 * _rho
 
 _K = 1 / 3 * (3 * _rho * _c_k**2 - _mu)
-# _K =_rho * _c_k**2
 _G = _mu
 _E = (9 * _K * _G) / (3 * _K + _G)
-# _E = 4 * _K * _mu / (_K + _G)
 _nu = (3 * _K - 2 * _G) / (2 * (3 * _K + _G))
-# _nu = (_K - _mu) / (_K + _mu)
 material_properties = {
     'E': _E,
     'nu': _nu,
@@ -42,12 +55,16 @@ material_properties = {
 l2_err_plot = []
 # grid_sizes = [320, 640]
 # grid_sizes = [160, 320]
-grid_sizes = np.array([int(gs*1**(1/3)) for gs in [640]])
+# grid_sizes = np.array([int(gs*1**(1/3)) for gs in [640]])
+# grid_sizes = [50, 100, 200, 400, 800, 1600, 2400, 3200, 4000]
+grid_sizes = [50, 100, 200, 400, 800]#, 1600, 2400, 3200, 4000]
+
 grid_sizes_run = []
-runtimes = []
+runtimes_no_comp = []
+runtimes_comp = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
+    stime_comp = time.time()
     grid_sizes_run.append(grid_size)
-    # print(f"Starting run {i+1} of {len(grid_sizes)}")
     # Mesh control
     mesh_parameters = {'nx': grid_size,
                        'ny': grid_size}
@@ -110,7 +127,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
                             tag_values[tagged_facets_sorted])
 
     # Domain and subdomain measures
-    # dx = ufl.Measure("dx", domain=mesh, metadata={"quadrature_degree": 4})
     dx = ufl.Measure("dx", domain=mesh)                         # Domain measure
     ds = ufl.Measure("ds", domain=mesh, subdomain_data=mt)      # External Boundary measure
     dS = ufl.Measure("dS", domain=mesh, subdomain_data=mt)      # External/Internal measure
@@ -270,7 +286,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         a_values[2*i + 1] = ay
     a.x.scatter_forward()
 
-    stime = time.time()
     step = 0
     snapshot_interval = 1
 
@@ -365,17 +380,20 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         
         step += 1
     ftime = time.time()
-    runtimes.append(ftime-stime)
+    runtimes_no_comp.append(ftime-stime)
+    runtimes_comp.append(ftime-stime_comp)
 
     comm = MPI.COMM_WORLD
 
     # Only rank 0 will get the full vector
     if comm.rank == 0:
-        print(f"runtimes: {runtimes}")
+        print(f"runtimes no comp: {runtimes_no_comp}")
+        print(f"runtimes comp: {runtimes_comp}")
         pbar.close()
 
 if comm.rank == 0:
-    print(f"runtimes: {runtimes}")
+    print(f"runtimes no comp: {runtimes_no_comp}")
+    print(f"runtimes comp: {runtimes_comp}")
 
     # delta_xs = 1 / np.array(grid_sizes_run)
     # plt.figure(figsize=(10, 5))
