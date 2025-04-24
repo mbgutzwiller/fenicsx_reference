@@ -67,11 +67,15 @@ runtimes_comp = []
 
 # grid_sizes = np.array([int(gs*1**(1/3)) for gs in [320]])
 # grid_sizes = [50, 100, 200, 400, 800, 1600, 3200, 4000]
-grid_sizes = [50, 100, 200, 400, 800, 1600, 3200, 4000]
+# grid_sizes = [50, 100, 200, 400, 800, 1600, 3200, 4000]
 # grid_sizes = [50, 100, 200, 400, 800, 1200, 1600]#, 2400, 3200, 4000]
 # grid_sizes = [2400]
+# grid_sizes = [4000]
+grid_sizes = np.array([50, 100, 200, 400, 800, 1600, 3200, 4000])*(1/2.036)**0.5  
+
 
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
+    grid_size = int(grid_size)
     grid_sizes_run.append(grid_size)
     stime_comp = time.time()
     # Mesh control
@@ -91,7 +95,7 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
                                         [np.array([0., 0.]), 
                                         np.array([geometry_parameters['Lx'], geometry_parameters['Ly']])], 
                                         [mesh_parameters['nx'], mesh_parameters['ny']], 
-                                        dolfinx.mesh.CellType.triangle)
+                                        dolfinx.mesh.CellType.quadrilateral)
 
     gdim = mesh.topology.dim
     fdim = gdim - 1 

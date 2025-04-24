@@ -41,8 +41,10 @@ material_properties = {
 l2_err_plot = []
 # grid_sizes = [10, 20, 40, 80, 120, 160, 240, 320, 640]
 grid_sizes = [40, 80, 120, 160, 240]
+# grid_sizes = np.array([50, 100, 200, 400, 800, 1600, 3200, 4000])*(1/2.036)**0.5  
 grid_sizes_run = []
 for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
+    grid_size = int(grid_size)
     grid_sizes_run.append(grid_size)
     print(f"Starting run {i+1} of {len(grid_sizes)}")
     # Mesh control
@@ -298,9 +300,6 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
         
         # Update body forces
         local_size = b.x.array.shape[0] // 2
-        # x = mesh.geometry.x[:local_size]
-        # x0 = x[:, 0]
-        # x1 = x[:, 1]
         dof_coords = V_t.tabulate_dof_coordinates()
         x0 = dof_coords[:, 0]
         x1 = dof_coords[:, 1]
@@ -311,11 +310,7 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
             t_ = t.value + delta_t.value
             b_values[0::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
             b_values[1::2] = _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
-            # t_ = t.value + delta_t.value
-            # b_values[0::2] += _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) + 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.))
-            # b_values[1::2] += _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) + 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_k ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 4.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - _c_mu ** 2*(8.*np.pi**2.*np.cos(4.*np.pi*x0)*np.cos(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ - 1./10.)) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))) - 16.*np.pi**2.*np.sin(4.*np.pi*x0)*np.sin(2.*np.pi*x1)*np.sin(4.*np.pi*(t_ + 3./10.))
-            # b_values[0::2] /= 2
-            # b_values[1::2] /= 2
+
         b.x.scatter_forward()
 
         # Update acceleration
@@ -436,9 +431,9 @@ for i, grid_size in zip(range(len(grid_sizes)), grid_sizes):
     ref_line2 = y2 * (delta_xs / x2)**2  # Slope 2
     plt.loglog(delta_xs, l2_err_plot, marker='o', color="blue")
     # plt.loglog(delta_xs, ref_line, "-.", label="Order 1")
-    plt.loglog(delta_xs, ref_line2, "--", label="Order 2", color="black")
-    plt.xlabel("Mesh size (h)")
-    plt.ylabel("L2 error")
+    plt.loglog(delta_xs, ref_line2, "--", label="Slope 2", color="black")
+    plt.xlabel("Grid spacing [m]")
+    plt.ylabel("Rel. Error Displacement [-]")
     plt.legend()
     plt.grid(True, which="both")
     plt.savefig("convergence_fencisx_final", dpi=600)
